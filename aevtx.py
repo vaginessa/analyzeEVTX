@@ -5,7 +5,7 @@
 # 01/31/2018
 
 from sys import exit
-from src.main.app import amft_main
+from src.main.app import aevtx_main
 
 if __name__ == '__main__':
-    exit(amft_main())
+    exit(aevtx_main())

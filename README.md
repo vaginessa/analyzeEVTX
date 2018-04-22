@@ -28,7 +28,7 @@ All of the core dependencies beside [six](https://pypi.python.org/pypi/six) come
 
 ## Getting Started
 
-analyzeEVTX can output information into CSV, bodyfile, and JSON file formats, as well as into a relational database.  Which output format you want will determine the command to use. See the [Usage](#usage) section for full usage documentation.
+analyzeEVTX can output information into CSV and JSON file formats, as well as into a relational database.  Which output format you want will determine the command to use. See the [Usage](#usage) section for full usage documentation.
 
 #### CSV Output
 
@@ -42,20 +42,6 @@ $ ./aevtx.py parse csv summary -s /path/to/EVTX -t /path/to/output.tsv --threads
 
 ```bash
 $ ./aevtx.py parse csv summary --lpath /path/to/log/ --lpref output -s /path/to/EVTX -t /path/to/output.csv --threads 3
-```
-
-#### Bodyfile Output
-
-```bash
-$ ./aevtx.py parse body -s /path/to/EVTX -t /path/to/output.body
-```
-
-```bash
-$ ./aevtx.py parse body -s /path/to/EVTX -t /path/to/output.body --threads 3
-```
-
-```bash
-$ ./aevtx.py parse body --lpath /path/to/log/ --lpref output -s /path/to/EVTX -t /path/to/output.body --threads 3
 ```
 
 #### JSON Output
@@ -107,7 +93,6 @@ Much like [Git](https://git-scm.com/docs), the CLI for analyzeEVTX is separated 
 | Directive | Description |
 |-----------|-------------|
 | csv | Parse EVTX file(s) to CSV |
-| body | Parse EVTX file(s) last execution times to bodyfile |
 | json | Parse EVTX file(s) to JSON |
 | file | Parse EVTX file(s) to multiple output formats (simultaneously) |
 | db | Parse EVTX file(s) to database |
@@ -122,20 +107,9 @@ Much like [Git](https://git-scm.com/docs), the CLI for analyzeEVTX is separated 
 | help | -h, --help | True | Show help message and exit |
 | log_path | --lpath | True | Path to log file directory (i.e. /path/to/logs or C:\Users\<user>\Documents\) |
 | log_prefix | --lpref | True | Prefix for log file (default: aevtx_\<date\>) |
+| count | -c, --count | True | Number of records to process (default: all) |
 | threads | --threads | True | Number of processes to use |
 | sep | -S, --sep | True | Output file separator (default: ",") |
-
-#### Parse Body Menu (aevtx.py parse body -h)
-
-| Argument | Flags | Optional | Description |
-|-----------|------|----------|-------------|
-| sources | -s, --source | False | Path to input file(s) - can use multiple times |
-| target | -t, --target | False | Path to output file |
-| help | -h, --help | True | Show help message and exit |
-| log_path | --lpath | True | Path to log file directory (i.e. /path/to/logs or C:\Users\<user>\Documents\) |
-| log_prefix | --lpref | True | Prefix for log file (default: aevtx_\<date\>) |
-| threads | --threads | True | Number of processes to use |
-| sep | -S, --sep | True | Output file separator (default: "\|") |
 
 #### Parse JSON Menu (aevtx.py parse json -h)
 
@@ -146,6 +120,7 @@ Much like [Git](https://git-scm.com/docs), the CLI for analyzeEVTX is separated 
 | help | -h, --help | True | Show help message and exit |
 | log_path | --lpath | True | Path to log file directory (i.e. /path/to/logs or C:\Users\<user>\Documents\) |
 | log_prefix | --lpref | True | Prefix for log file (default: aevtx_\<date\>) |
+| count | -c, --count | True | Number of records to process (default: all) |
 | threads | --threads | True | Number of processes to use |
 | pretty | -p, --pretty | True | Whether to pretty-print the JSON output (ignored if threads > 1) |
 
@@ -155,10 +130,11 @@ Much like [Git](https://git-scm.com/docs), the CLI for analyzeEVTX is separated 
 |-----------|------|----------|-------------|
 | sources | -s, --source | False | Path to input file(s) - can use multiple times |
 | target | -t, --target | False | Path to output file (without extension) |
-| formats | -f, --format | False | Comma-separated list of output formats (choices: csv, body, and json) |
+| formats | -f, --format | False | Comma-separated list of output formats (choices: csv and json) |
 | help | -h, --help | True | Show help message and exit |
 | log_path | --lpath | True | Path to log file directory (i.e. /path/to/logs or C:\Users\<user>\Documents\) |
 | log_prefix | --lpref | True | Prefix for log file (default: aevtx_\<date\>) |
+| count | -c, --count | True | Number of records to process (default: all) |
 | threads | --threads | True | Number of processes to use |
 | pretty | -p, --pretty | True | Whether to pretty-print the JSON output (ignored if threads > 1) |
 | info_type | -i, --info-type | True | Information type for CSV output |
@@ -178,6 +154,7 @@ Much like [Git](https://git-scm.com/docs), the CLI for analyzeEVTX is separated 
 | db_port | -C, --connect | True | Port database is listening on (alternative to connection string) |
 | log_path | --lpath | True | Path to log file directory (i.e. /path/to/logs or C:\Users\<user>\Documents\) |
 | log_prefix | --lpref | True | Prefix for log file (default: aevtx_\<date\>) |
+| count | -c, --count | True | Number of records to process (default: all) |
 | threads | --threads | True | Number of processes to use |
 
 For examples, see [Getting Started](#getting-started)
@@ -209,34 +186,12 @@ $ ./aevtx.py query -n ./test.db -q "select file_name, file_path, sha2hash from f
 
 ## Output Formats
 
-Due to the relational nature of the EVTX, the various file formats output different types of information.  See the sections below for a detailed desciption of each.
+See the sections below for a detailed desciption of each output format.
 
 ### CSV Format
 
 | Field | Description |
 |-------|-------------|
-
-### Bodyfile Format
-
-The body format attempts to mimic the bodyfile format v3.x created by [TSK](http://wiki.sleuthkit.org/index.php?title=Body_file):
-
-| Field | Description |
-|-------|-------------|
-| nodeidx | index of parsed EVTX file |
-| recordidx |  |
-| MD5 |  |
-| name | filename of parsed EVTX file |
-| inode |  |
-| mode_as_string |  |
-| UID |  |
-| GID |  |
-| size | size of parsed EVTX file |
-| atime |  |
-| mtime |  |
-| ctime |  |
-| crtime |  |
-
-\*: the nodeidx and recordidx fields exists so that when processing data in parallel, the program knows how to properly sort output data.
 
 ## JSON Format
 

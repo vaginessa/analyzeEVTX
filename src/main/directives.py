@@ -36,7 +36,7 @@ from terminaltables import AsciiTable
 from src.utils.config import initialize_logger, synthesize_log_path
 from src.utils.registry import RegistryMetaclassMixin 
 from src.utils.logging import closeFileHandlers
-from src.parsers.evtx import {{FILECLASS}
+from src.parsers.evtx import EventLogX
 import src.utils.parallel as parallel
 import src.main.tasks as tasks
 from src.database.manager import DBManager
@@ -149,7 +149,7 @@ class ParseDirectiveMixin(object):
     def _get_remaining_count(cls, filepath, record_count, max_records):
         '''
         '''
-        raise NotImplementedError('_get_remaining_count method not implemented for %s'cls.__name__)
+        raise NotImplementedError('_get_remaining_count method not implemented for %s'%cls.__name__)
 
     @property
     def frontier(self):
@@ -377,9 +377,9 @@ class BaseParseFileOutputDirective(ParseDirectiveMixin, BaseDirective):
     def _add_tasks(self, evtx_record, nodeidx, recordidx):
         '''
         Args:
-            evtx_record: ByteString  => MFT record to add to task
-            nodeidx: Integer        => index of node (MFT file) being parsed
-            recordidx: Integer      => index of MFT record being parsed
+            evtx_record: ByteString  => EVTX record to add to task
+            nodeidx: Integer        => index of node (EVTX file) being parsed
+            recordidx: Integer      => index of EVTX record being parsed
         Procedure:
             Add task(s) to parsing queue
         Preconditions:
@@ -464,37 +464,6 @@ class ParseCSVDirective(BaseParseFileOutputDirective):
         '''
         super(ParseCSVDirective, self).run()
 
-class ParseBODYDirective(BaseParseFileOutputDirective):
-    '''
-    Directive for parsing EVTX file to BODY format
-    '''
-    _TASK_CLASS = tasks.ParseBODYTask
-
-    def _get_task_kwargs(self):
-        '''
-        @BaseParseFileOutputDirective._get_task_kwargs
-        '''
-        return dict(target=self.args.target_parent, sep=self.args.sep)
-    def _get_worker_kwargs(self):
-        '''
-        @BaseParseFileOutputDirective._get_worker_kwargs
-        '''
-        return dict(result_queue=self.pools.progress.queue, log_path=self.args.log_path)
-    def run(self):
-        '''
-        Args:
-            N/A
-        Procedure:
-            Parse EVTX information to BODY format
-        Preconditions:
-            @BaseDirective.run_directive
-            args.sources is of type List<String>        (assumed True)
-            args.target is of type String               (assumed True)
-            args.target points to existing directory
-            args.sep is of type String                  (assumed True)
-        '''
-        super(ParseBODYDirective, self).run()
-
 class ParseJSONDirective(BaseParseFileOutputDirective):
     '''
     Directive for parsing EVTX file to JSON format
@@ -563,7 +532,7 @@ class ParseFILEDirective(BaseParseFileOutputDirective):
         for fmt in self.args.formats:
             kwargs = dict(target=path.join(self.args.target_parent, fmt))
             if fmt != 'json':
-                kwargs['sep'] = self.args.sep if fmt != 'body' else '|'
+                kwargs['sep'] = self.args.sep
                 if fmt == 'csv':
                     kwargs['info_type'] = self.args.info_type
             else:

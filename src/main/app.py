@@ -25,7 +25,7 @@ from src.utils.config import initialize_paths
 initialize_paths()
 from src.main.cli import initialize_parser
 
-def amft_main():
+def aevtx_main():
     ''''
     Args:
         N/A

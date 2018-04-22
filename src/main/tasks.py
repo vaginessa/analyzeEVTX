@@ -31,7 +31,7 @@ from json import dumps
 from construct.lib import Container
 
 import src.database.models as db
-from src.parsers.evtx import EventLogXEntry
+from src.parsers.evtx import EventLogXRecord
 
 class BaseParseTask(object):
     '''
@@ -188,7 +188,7 @@ class BaseParseFileOutputTask(BaseParseTask):
         finally:
             return [True]
 
-class ParseCSVTask(BaseParseFileOutputTask, FileNameResolutionMixin):
+class ParseCSVTask(BaseParseFileOutputTask):
     '''
     Class for parsing single EVTX record to CSV format
     '''
@@ -209,41 +209,6 @@ class ParseCSVTask(BaseParseFileOutputTask, FileNameResolutionMixin):
                     self.result_set.append(result)
                 except Exception as e:
                     Logger.error('Failed to create CSV output record of EVTX record %d for node %d (%s)'%(self.recordidx, self.nodeidx, str(e)))
-
-class ParseBODYTask(BaseParseFileOutputTask, FileNameResolutionMixin):
-    '''
-    Task class for parsing single EVTX record to BODY format
-    '''
-    @staticmethod
-    def to_timestamp(dt):
-        '''
-        Args:
-            dt: DateTime<UTC>   => datetime object to convert
-        Returns:
-            Float
-            Datetime object converted to Unix epoch time
-        Preconditions:
-            dt is timezone-aware timestamp with timezone UTC
-        '''
-        return (dt - datetime(1970,1,1, tzinfo=timezone.utc)) / timedelta(seconds=1)
-
-    def extract_resultset(self, worker):
-        '''
-        @BaseParseTask.extract_resultset
-        '''
-        self.result_set = list()
-        # FIELDS: nodeidx|recordidx|MD5|name|inode|mode_as_string|UID|GID|size|atime|mtime|ctime|crtime
-        try:
-            evtx_record = EventLogXRecord(self.source)
-            evtx_record.parse()
-        except Exception as e:
-            Logger.error('Failed to parse EVTX record %d for node %d (%s)'%(self.recordidx, self.nodeidx, str(e)))
-        else:
-            try:
-                result = list()
-                self.result_set.append(result)
-            except Exception as e:
-                    Logger.error('Failed to create BODY output records of EVTX record %d for node %d (%s)'%(self.recordidx, self.nodeidx, str(e)))
 
 class ParseJSONTask(BaseParseFileOutputTask):
     '''

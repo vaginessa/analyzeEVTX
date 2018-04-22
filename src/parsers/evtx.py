@@ -41,21 +41,6 @@ class EventLogXRecord(Container):
 
     def __init__(self, raw_entry, load=False):
         super(EventLogXRecord, self).__init__()
-        for attribute in [\
-            'standard_information',
-            'attribute_list',
-            'file_name',
-            'object_id',  
-            'security_descriptor',
-            'volume_name',
-            'volume_information',
-            'data',
-            'index_root',
-            'index_allocation',
-            'bitmap',
-            'logged_utility_stream'\
-        ]:
-            self[attribute] = list()
         self._raw_entry = raw_entry
         self._stream = None
         if load:
@@ -240,6 +225,7 @@ class EventLogX(Container):
         evtx_file = open(self._filepath, 'rb')
         try:
             #TODO: implement records
+            pass
         finally:
             evtx_file.close()
             evtx_file = None

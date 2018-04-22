@@ -96,10 +96,6 @@ def initialize_parser():
     csv_output_parent = ArgumentParser(parents=[base_output_parent], add_help=False)
     csv_output_parent.add_argument('-S', '--sep', default=',', help='Output file separator (default: ",")', dest='sep')
 
-    ## Bodyfile output parent parser
-    body_output_parent = ArgumentParser(parents=[base_output_parent], add_help=False)
-    body_output_parent.add_argument('-S', '--sep', default='|', choices=['|'], help='Output file separator (default: "|")', dest='sep')
-
     ## DB connect parent parser
     db_connect_parent = ArgumentParser(add_help=False)
     db_connect_parent.add_argument('-d', '--driver', type=str, default='sqlite', help='Database driver to use (default: sqlite)', dest='db_driver')
@@ -111,11 +107,11 @@ def initialize_parser():
     db_connect_parent.add_argument('-P', '--port', type=str, help='Port database is listening on (alternative to connection string)', dest='db_port')
 
     ## Parse directives
-    parse_directive = main_directives.add_parser('parse', help='$MFT file parser directives')
+    parse_directive = main_directives.add_parser('parse', help='EVTX file parser directives')
     parse_subdirectives = parse_directive.add_subparsers()
 
     # CSV parse directive
-    csv_parse_directive = parse_subdirectives.add_parser('csv', parents=[base_parent, base_parse_parent, csv_output_parent], help='Parse $MFT file to csv')
+    csv_parse_directive = parse_subdirectives.add_parser('csv', parents=[base_parent, base_parse_parent, csv_output_parent], help='Parse EVTX file to csv')
     csv_parse_directive.add_argument('info_type', \
         type=str, \
         default='summary', \
@@ -123,28 +119,24 @@ def initialize_parser():
         help='Type of information to output')
     csv_parse_directive.set_defaults(func=DirectiveRegistry.retrieve('ParseCSVDirective'))
     
-    # Bodyfile parse directive
-    body_parse_directive = parse_subdirectives.add_parser('body', parents=[base_parent, base_parse_parent, body_output_parent], help='Parse $MFT MAC times to bodyfile')
-    body_parse_directive.set_defaults(func=DirectiveRegistry.retrieve('ParseBODYDirective'))
-
     # JSON parse directive
-    json_parse_directive = parse_subdirectives.add_parser('json', parents=[base_parent, base_parse_parent, base_output_parent], help='Parse $MFT file to JSON')
+    json_parse_directive = parse_subdirectives.add_parser('json', parents=[base_parent, base_parse_parent, base_output_parent], help='Parse EVTX file to JSON')
     json_parse_directive.add_argument('-p', '--pretty', action='store_true', help='Whether to pretty-print the JSON output', dest='pretty')
     json_parse_directive.set_defaults(func=DirectiveRegistry.retrieve('ParseJSONDirective'))
 
     # File parse directive
-    file_parse_directive = parse_subdirectives.add_parser('file', parents=[base_parent, base_parse_parent, csv_output_parent], help='Parse $MFT file to multiple output formats')
+    file_parse_directive = parse_subdirectives.add_parser('file', parents=[base_parent, base_parse_parent, csv_output_parent], help='Parse EVTX file to multiple output formats')
     file_parse_directive.add_argument('-f', '--format', type=FileFormatList, required=True, help='Comma-separated list of output formats (choices: csv, body, and json)', dest='formats')
     file_parse_directive.add_argument('-p', '--pretty', action='store_true', help='Whether to pretty-print the JSON output', dest='pretty')
     file_parse_directive.add_argument('-i', '--info-type', type=str, help='Information type for CSV output', dest='info_type')
     file_parse_directive.set_defaults(func=DirectiveRegistry.retrieve('ParseFILEDirective'))
 
     # Database parse directive
-    db_parse_directive = parse_subdirectives.add_parser('db', parents=[base_parent, base_parse_parent, db_connect_parent], help='Parse $MFT file to database')
+    db_parse_directive = parse_subdirectives.add_parser('db', parents=[base_parent, base_parse_parent, db_connect_parent], help='Parse EVTX file to database')
     db_parse_directive.set_defaults(func=DirectiveRegistry.retrieve('ParseDBDirective'))
 
     ## Query directive
-    query_directive = main_directives.add_parser('query', parents=[base_parent, db_connect_parent], help='Submit queries to $MFT database')
+    query_directive = main_directives.add_parser('query', parents=[base_parent, db_connect_parent], help='Submit queries to EVTX database')
     query_directive.add_argument('-t', '--target', type=str, help='Path to output file (default: stdout)', dest='target')
     query_directive.add_argument('-q', '--query', type=str, required=True, help='Query to submit to database', dest='query')
     query_directive.add_argument('-S', '--sep', default=',', help='Output file separator (default: ",")', dest='sep')
